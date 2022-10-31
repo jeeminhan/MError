@@ -2,8 +2,6 @@
 
 
 # Virtual Environment Setup
-WINDOWS
-
 virtualenv venv
 
 venv\scripts\activate
@@ -15,7 +13,7 @@ pip install django==4.1.2
 pip install requests
 
 
-Each time a change is made in the Django project - Run these three commands
+Each time a change is made in the Django project concerning models/database stuff - Run all of these commands
 
 python manage.py makemigrations
 
