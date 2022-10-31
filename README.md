@@ -1,22 +1,29 @@
 # MError
 
+## Virtual Environment Setup
 
-# Virtual Environment Setup
+Cd into project directory
+
+Run these commands to setup, activate and deactivate virtual environment
+```
 virtualenv venv
-
 venv\scripts\activate
+deactivate
+```
 
-Within the virtual environment
+## Installing dependencies
 
-pip install django==4.1.2
+All dependencies have been added to the requirements.txt file
 
-pip install requests
+Note: Edit requirements.txt with new dependencies as the application needs more
+```
+pip install -r requirements.txt
+```
 
-
-Each time a change is made in the Django project concerning models/database stuff - Run all of these commands
-
+## Django Run-time commands
+Note: Migration commands only required when changes made to the data models/database
+```
 python manage.py makemigrations
-
 python manage.py migrate
-
 python manage.py runserver
+```
