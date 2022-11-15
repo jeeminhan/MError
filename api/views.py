@@ -13,16 +13,18 @@ if os.path.isfile(dotenv_file):
         dotenv.load_dotenv(dotenv_file)
 NEWS_API_KEY = os.environ['NEWS_API_KEY']
 BEARER_TOKEN = os.environ['BEARER_TOKEN']
+WEATHER_API_KEY = os.environ['WEATHER_API_KEY']
 
 def index(request):
     # API function
     news_titles=news_API()
     tweets=twitter_API()
     date_time=time_API()
+    weather=weather_API()
 
 
     # Data transformation for display
-    response={"news":news_titles, "tweets":tweets,'date_time':date_time}
+    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather}
 
     return render(request, "index.html", response)
 
@@ -41,16 +43,6 @@ def news_API():
         titles+=[news['articles'][i]['title']]
     
     return titles
-
-# def index(request):
-#     # API function
-#     tweets=twitter_API()
-
-#     # Data transformation for display
-#     response={"tweets":tweets}
-
-#     return render(request, "index.html", response)
-
 
 def twitter_API():
     # Link for making request
@@ -74,3 +66,19 @@ def time_API():
 
     date_time=[date,str(time)]
     return date_time
+
+
+def weather_API():
+    """
+    {'coord': {'lon': -96.33, 'lat': 30.62}, 'weather': [{'id': 804, 'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04n'}], 
+    'base': 'stations', 'main': {'temp': 280.43, 'feels_like': 276.22, 'temp_min': 279.85, 'temp_max': 281.29, 'pressure': 1021, 'humidity': 89}, 
+    'visibility': 10000, 'wind': {'speed': 8.23, 'deg': 330, 'gust': 11.32}, 'clouds': {'all': 100}, 'dt': 1668490847, 
+    'sys': {'type': 2, 'id': 2004581, 'country': 'US', 'sunrise': 1668430250, 'sunset': 1668468535}, 'timezone': -21600, 'id': 4682464, 
+    'name': 'College Station', 'cod': 200}
+    """
+
+    url="https://api.openweathermap.org/data/2.5/weather?lat=30.62&lon=-96.33&appid="+WEATHER_API_KEY
+    weather=requests.get(url).json()
+    results=[weather['weather'][0]['main'],str(weather['main']['humidity']),str(int(weather['main']['temp'])-273)+"\xb0"+"C", 'http://openweathermap.org/img/w/'+weather['weather'][0]['icon']+'.png']
+
+    return results
