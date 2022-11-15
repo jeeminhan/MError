@@ -19,4 +19,17 @@ def news_API():
     print("HERE")
     return titles
 
-print(news_API())
+# print(news_API())
+
+
+def time_API():
+    url="https://www.timeapi.io/api/Time/current/zone?timeZone=America/Chicago"
+    date_time=requests.get(url).json()
+    date=date_time['dateTime'].split("T")[0]
+    time=date_time['time']
+
+    date_time=[date,str(time)]
+    return date_time
+
+
+print(time_API())
