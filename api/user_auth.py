@@ -1,54 +1,46 @@
-# Import auth functions
-from pathlib import Path
-import dotenv
+# This file has all the associated helper functions for authentication purposes
 from .models import UserAccount
 import cv2
+
 import threading
 import face_recognition as fr
 import numpy as np
 import os
-from django.shortcuts import render
-import time
-
-
-from .api_helpers import twitter_API, news_API, weather_API, time_API
-
-# Create your views here.
-
-
-# Video running for 20 sec => Web app 
-# auth state render => then restart
-
-
-# CAMERA RUNNING NONSTOP
-# WHILE TRUE => ONCE IDENITIFIES A USER
-# CHANGE THE WEBAPP FROM GUEST TO USER MODE
-
-def index(request):
-    # START THREAD 1
-
-    thread1=threading.Thread(target=examine_user)
-    thread1.start()
-    print("THREAD STARTED")
-
-    news_titles=news_API()
-    tweets=twitter_API()
-    date_time=time_API()
-    weather=weather_API()
-    users=all_users()
-
-
-    # Data transformation for display
-    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather, 'users':users, 'auth_user':AUTH_USER}
-
-    return render(request, "index.html", response)
-
 
 # Accessing User Information
 def all_users():
      users=UserAccount.objects.all()
      print(users)
      return users
+
+
+def get_picture():  
+    # define a video capture object
+    vid = cv2.VideoCapture(0)
+    counter=0
+
+    while(counter<400):
+        
+        # Capture the video frame
+        # by frame
+        ret, frame = vid.read()
+    
+        # Display the resulting frame
+        cv2.imshow('frame', frame)
+        
+        # the 'q' button is set as the
+        # quitting button you may use any
+        # desired button of your choice
+        
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+        counter+=1
+    
+    # After the loop release the cap object
+    vid.release()
+    # Destroy all the windows
+    cv2.destroyAllWindows()
 
 
 def get_face_encodings():
@@ -63,16 +55,14 @@ def get_face_encodings():
         face = fr.load_image_file(f"{faces_path}\\{name}")
         face_encodings.append(fr.face_encodings(face)[0])
 
-        #face_names[i] = name.split(".")[0] To remove ".jpg" or any other image extension
+        face_names[i] = name.split(".")[0] # To remove ".jpg" or any other image extension
     
     return face_encodings, face_names
 
 
-def examine_user():
+def examine_user(auth):
     global AUTH_USER
-    global AUTH_DONE
     AUTH_USER=""
-    AUTH_DONE=False
 
     # Retrieving face encodings and storing them in the face_encodings variable, along with the names
     face_encodings, face_names = get_face_encodings()
@@ -85,13 +75,9 @@ def examine_user():
 
     # Continuously capturing webcam footage
     # while True:
-    counter=0
-
-    while(counter<80):
-    # while True:
+    while not auth.is_set():
         success, image = video.read()
-        users=UserAccount.objects.all()
-        
+
         # Making current frame smaller so program runs faster
         resized_image = cv2.resize(image, (int(image.shape[1]/scl), int(image.shape[0]/scl)))
 
@@ -109,19 +95,8 @@ def examine_user():
             print(result)
             # Getting correct name if a match was found
             if True in result:
-
                 # print(result, face_names[result.index(True)])
-                head_shot = face_names[result.index(True)]
-                path = "user_profile_images/"+head_shot
-
-                # FINDING APPROPRIATE USER OBJECT
-                for user in users:
-                    if user.head_shot==path:
-                        print("MATCH FOUND")
-                        AUTH_DONE=True
-                        AUTH_USER=user.first_name+" "+user.last_name
-
-                        print("STATE CHANGE: ", AUTH_DONE, AUTH_USER)
+                name = face_names[result.index(True)]
 
                 # # Setting coordinates for face location
                 top, right, bottom, left = face_location
@@ -131,17 +106,8 @@ def examine_user():
 
                 # # Setting font, as well as displaying text of name
                 font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(image, AUTH_USER, (left*scl, bottom*scl + 20), font, 0.8, (255, 255, 255), 1)
-                
-                # auth.set()
-                # break
-                # time.sleep(20)
+                cv2.putText(image, name, (left*scl, bottom*scl + 20), font, 0.8, (255, 255, 255), 1)
+
         # Displaying final image on the screen
         cv2.imshow("frame", image)
-        counter+=1
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    # Destroy all the windows
-    cv2.destroyAllWindows()
-    # After the loop release the cap object
-    video.release()
+        cv2.waitKey(1)
