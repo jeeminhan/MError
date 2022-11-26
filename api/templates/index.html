@@ -24,10 +24,11 @@
         <strong>{{i}}</strong>
         <br>
         {% endfor %}
-        {% for i in cal %}
-        <strong>{{i}}</strong>
+        {% for d in cal %}
+        <strong>{{d.date}}</strong><strong>{{d.startTime}}</strong><strong>{{d.endTime}}</strong><strong>{{d.summary}}</strong>
         <br>
         {% endfor %}
+    
     </body>
     
 </html>
