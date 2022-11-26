@@ -6,6 +6,17 @@ import requests
 import tweepy
 from pathlib import Path
 
+# from __future__ import print_function
+
+import datetime
+import os.path
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+# from googleapiclient.errors import HttpError
+
 # Create your views here.
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv_file = os.path.join(BASE_DIR, ".env")
@@ -15,16 +26,19 @@ NEWS_API_KEY = os.environ['NEWS_API_KEY']
 BEARER_TOKEN = os.environ['BEARER_TOKEN']
 WEATHER_API_KEY = os.environ['WEATHER_API_KEY']
 
+
+
 def index(request):
     # API function
     news_titles=news_API()
     tweets=twitter_API()
     date_time=time_API()
     weather=weather_API()
+    cal=googleCal_API()
 
 
     # Data transformation for display
-    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather}
+    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather, 'cal':cal}
 
     return render(request, "index.html", response)
 
@@ -48,7 +62,7 @@ def twitter_API():
     # Link for making request
     client = tweepy.Client(bearer_token=BEARER_TOKEN)
     query = 'from:elonmusk -is:retweet'
-
+    
     tweets = client.search_recent_tweets(query=query, tweet_fields=['context_annotations', 'created_at'], max_results=10)
 
     tweets_data=[]
@@ -82,3 +96,65 @@ def weather_API():
     results=[weather['weather'][0]['main'],str(weather['main']['humidity']),str(int(weather['main']['temp'])-273)+"\xb0"+"C", 'http://openweathermap.org/img/w/'+weather['weather'][0]['icon']+'.png']
 
     return results
+
+
+# If modifying these scopes, delete the file token.json.
+SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+
+def googleCal_API():
+    """Shows basic usage of the Google Calendar API.
+    Prints the start and name of the next 10 events on the user's calendar.
+    """
+    creds = None
+    # The file token.json stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first
+    # time.
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                '../credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
+
+    # try:
+    service = build('calendar', 'v3', credentials=creds)
+
+    # Call the Calendar API
+    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
+    # print('Getting the upcoming 10 events')
+    events_result = service.events().list(calendarId='primary', timeMin=now,
+                                            maxResults=10, singleEvents=True,
+                                            orderBy='startTime').execute()
+    events = events_result.get('items', [])
+    # page_token = None
+    # while True:
+    #     events = service.events().list(calendarId='primary', pageToken=page_token).execute()
+    #     for event in events['items']:
+    #         print(event['summary'])
+    #     page_token = events.get('nextPageToken')
+    #     if not page_token:
+    #         break
+
+    if not events:
+        # print('No upcoming events found.')
+        return
+
+    # Prints the start and name of the next 10 events
+    calList = []
+    for event in events:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        end = event['end'].get('dateTime', event['end'].get('date'))
+        calList.append({'date':start[0:10], 'startTime':start[11:19], 'endTime':end[11:19], 'summary':event['summary']})
+        # return (start, end, event['summary'])
+    return calList
+
+    # except HttpError as error:
+    #     return ('An error occurred: %s' % error)
+
