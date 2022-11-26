@@ -22,13 +22,12 @@ def index(request):
     date_time=time_API()
     weather=weather_API()
 
-
     # Data transformation for display
-    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather}
+    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather, 'users':users}
 
     return render(request, "index.html", response)
 
-# # HELPER FUNCTIONS TO PERFORM AND PROCESS THE API requests
+# HELPER FUNCTIONS TO PERFORM AND PROCESS THE API requests
 def news_API():
 
     # Link for making request
