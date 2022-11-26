@@ -8,6 +8,11 @@
     </div>
     <body text="#ffffff" style= "background-color:black;">
         <h1>MERROR UI - TWEETS</h1>
+        {% for i in users %}
+        <strong>{{i}}</strong>
+        <br>
+        {% endfor %}
+
         {% for i in tweets %}
         <strong>{{i}}</strong>
         <br>

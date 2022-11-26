@@ -21,6 +21,7 @@ def index(request):
     tweets=twitter_API()
     date_time=time_API()
     weather=weather_API()
+    users=all_users()
 
     # Data transformation for display
     response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather, 'users':users}
@@ -81,3 +82,20 @@ def weather_API():
     results=[weather['weather'][0]['main'],str(weather['main']['humidity']),str(int(weather['main']['temp'])-273)+"\xb0"+"C", 'http://openweathermap.org/img/w/'+weather['weather'][0]['icon']+'.png']
 
     return results
+
+
+
+"""
+
+Accessing User Information
+
+"""
+from .models import UserAccount
+
+def all_users():
+     users=UserAccount.objects.all()
+     print(users)
+     print(users[0].first_name)
+     print(users[0].last_name)
+     print(users[0].head_shot)
+     return users
