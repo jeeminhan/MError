@@ -1,7 +1,7 @@
 # Import auth functions
 from pathlib import Path
 import dotenv
-from .models import UserAccount
+from ..models import UserAccount
 import cv2
 import threading
 import face_recognition as fr
@@ -11,7 +11,7 @@ from django.shortcuts import render
 import time
 
 
-from .api_helpers import twitter_API, news_API, weather_API, time_API
+from ..api_helpers import twitter_API, news_API, weather_API, time_API
 
 # Create your views here.
 
