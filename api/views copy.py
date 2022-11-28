@@ -25,12 +25,11 @@ from .api_helpers import twitter_API, news_API, weather_API, time_API
 # CHANGE THE WEBAPP FROM GUEST TO USER MODE
 
 def index(request):
+    # START THREAD 1
 
-    # thread1=threading.Thread(target=examine_user)
-    # thread1.start()
-    # print("THREAD STARTED")
-
-    auth_user=examine_user()
+    thread1=threading.Thread(target=examine_user)
+    thread1.start()
+    print("THREAD STARTED")
 
     news_titles=news_API()
     tweets=twitter_API()
@@ -40,12 +39,9 @@ def index(request):
 
 
     # Data transformation for display
-    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather, 'users':users, 'auth_user':auth_user}
+    response={"news":news_titles, "tweets":tweets,'date_time':date_time, 'weather':weather, 'users':users, 'auth_user':AUTH_USER}
 
-    if (auth_user[0]):
-        return render(request, "auth.html", response)
-    else:
-        return render(request, "index.html", response)
+    return render(request, "index.html", response)
 
 
 # Accessing User Information
@@ -73,10 +69,10 @@ def get_face_encodings():
 
 
 def examine_user():
-    AUTH_DONE=False
+    global AUTH_USER
+    global AUTH_DONE
     AUTH_USER=""
-    AUTH_USER_CITY=""
-    user_data=[AUTH_DONE,AUTH_USER,AUTH_USER_CITY]
+    AUTH_DONE=False
 
     # Retrieving face encodings and storing them in the face_encodings variable, along with the names
     face_encodings, face_names = get_face_encodings()
@@ -91,7 +87,7 @@ def examine_user():
     # while True:
     counter=0
 
-    while(counter<15):
+    while(counter<80):
     # while True:
         success, image = video.read()
         users=UserAccount.objects.all()
@@ -124,18 +120,8 @@ def examine_user():
                         print("MATCH FOUND")
                         AUTH_DONE=True
                         AUTH_USER=user.first_name+" "+user.last_name
-                        AUTH_USER_CITY=user.city
 
-                        user_data=[AUTH_DONE, AUTH_USER, AUTH_USER_CITY]
-
-                        # Destroy all the windows
-                        cv2.destroyAllWindows()
-                        # After the loop release the cap object
-                        video.release()
-
-                        print("STATE CHANGE: ", AUTH_DONE, AUTH_USER, AUTH_USER_CITY)
-                        return(user_data)
-                    
+                        print("STATE CHANGE: ", AUTH_DONE, AUTH_USER)
 
                 # # Setting coordinates for face location
                 top, right, bottom, left = face_location
@@ -160,4 +146,3 @@ def examine_user():
     cv2.destroyAllWindows()
     # After the loop release the cap object
     video.release()
-    return(user_data)
