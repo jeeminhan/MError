@@ -33,7 +33,9 @@ pip install -r requirements.txt
 pip install requests
 pip install tweepy
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
-pip3 install --upgrade oauth2client 
+pip install python-dotenv
+
+(in case of errors pip3 install --upgrade oauth2client)
 ```
 
 Make sure you have the necessary .env file. (You may have to rename the file to .env) If using mac (⌘ + ⇧ + SHIFT) to view '.' files.
