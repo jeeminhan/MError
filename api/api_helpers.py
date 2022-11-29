@@ -61,6 +61,7 @@ def weather_API():
     'sys': {'type': 2, 'id': 2004581, 'country': 'US', 'sunrise': 1668430250, 'sunset': 1668468535}, 'timezone': -21600, 'id': 4682464, 
     'name': 'College Station', 'cod': 200}
     """
+    # OPENWEATHER API - get long lat from the user.city
 
     url="https://api.openweathermap.org/data/2.5/weather?lat=30.62&lon=-96.33&appid="+WEATHER_API_KEY
     weather=requests.get(url).json()
