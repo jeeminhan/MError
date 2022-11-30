@@ -3,11 +3,14 @@ import face_recognition as fr
 from .models import UserAccount
 import os
 
+import signal
+from sys import exit
+
 # Accessing User Information
 def all_users():
-     users=UserAccount.objects.all()
-     return users
-
+    users=UserAccount.objects.all()
+    return users
+# TODO: update faces_path for pi (currently customized for Akash's computer)
 def get_face_encodings():
     faces_path = r"D:\Projects Collection\Personal Website\MError\user_profile_images"
     face_names = os.listdir(faces_path)
@@ -22,8 +25,15 @@ def get_face_encodings():
     
     return face_encodings, face_names
 
-
 def examine_user():
+    
+    # Ctrl-C Handler
+    def handler(frame, sig=signal.SIGINT):
+        cv2.destroyAllWindows()
+        video.release()
+        # exit() input provided as error message
+        exit("SIGINT detected, exiting...")
+        
     AUTH_DONE=False
     AUTH_USER=""
     AUTH_USER_CITY=""
@@ -34,6 +44,7 @@ def examine_user():
 
     # Reference to webcam
     video = cv2.VideoCapture(0)
+    signal.signal(signal.SIGINT, handler)
 
     # Setting variable which will be used to scale size of image
     scl = 2
