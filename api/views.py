@@ -3,6 +3,7 @@ from pathlib import Path
 import dotenv
 import numpy as np
 from django.shortcuts import render
+from .models import UserAccount
 
 # IMPORTING HELPER
 from .api_helpers import twitter_API, news_API, weather_API, time_API
@@ -28,3 +29,17 @@ def index(request):
         return render(request, "auth.html", response)
     else:
         return render(request, "index.html", response)
+
+def registrationPage(request):
+
+    if request.method == 'POST':
+        email = request.POST['email']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        city = request.POST['city']
+        head_shot = request.POST['head_shot']
+
+        new_user = UserAccount(email=email,first_name=first_name,last_name=last_name,city=city,head_shot=head_shot)
+        new_user.save()
+
+    return render(request, "registration.html", response)
